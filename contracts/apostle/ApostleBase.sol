@@ -10,7 +10,7 @@ import "../common/contracts/SupportsInterfaceWithLookup"
 import "./ApostleSettingIds.sol";
 import "./interfaces/IGeneScience.sol";
 
-contract ApostleBase is SupportsInterfaceWithLookup, IActivity, IActivityObject, PausableDSAuth{
+contract ApostleBase is SupportsInterfaceWithLookup, IActivity, IActivityObject, PausableDSAuth, ApostleSettingIds{
 
     event Birth(
         address indexed owner, uint256 apostleTokenId, uint256 matronId, uint256 sireId, uint256 genes, uint256 talents, uint256 coolDownIndex, uint256 generation, uint256 birthTime
