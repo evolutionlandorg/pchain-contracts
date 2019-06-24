@@ -18,6 +18,13 @@ contract ApostleBase is SupportsInterfaceWithLookup, IActivity, IActivityObject,
     event Pregnant(
         uint256 matronId,uint256 matronCoolDownEndTime, uint256 matronCoolDownIndex, uint256 sireId, uint256 sireCoolDownEndTime, uint256 sireCoolDownIndex
     );
+    
+    /// @dev The AutoBirth event is fired when a cat becomes pregant via the breedWithAuto()
+    ///  function. This is used to notify the auto-birth daemon that this breeding action
+    ///  included a pre-payment of the gas required to call the giveBirth() function.
+    event AutoBirth(uint256 matronId, uint256 cooldownEndTime);
+
+    event Unbox(uint256 tokenId, uint256 activeTime);
 
     struct Apostle {
         // An apostles genes never change.
@@ -161,7 +168,7 @@ contract ApostleBase is SupportsInterfaceWithLookup, IActivity, IActivityObject,
         return (tokenId2Apostle[_apostleId].siringWithId == 0) && (tokenId2Apostle[_apostleId].cooldownEndTime <= now);
     }
 
-        function approveSiring(address _addr, uint256 _sireId)
+    function approveSiring(address _addr, uint256 _sireId)
     public
     whenNotPaused
     {
@@ -200,6 +207,10 @@ contract ApostleBase is SupportsInterfaceWithLookup, IActivity, IActivityObject,
 
         return uint256(aps.cooldownEndTime);
 
+    }
+    
+    function _isReadyToGiveBirth(Apostle storage _matron) private view returns (bool) {
+        return (_matron.siringWithId != 0) && (_matron.cooldownEndTime <= now);
     }
 
     /// @dev Internal check to see if a given sire and matron are a valid mating pair. DOES NOT
@@ -387,15 +398,6 @@ contract ApostleBase is SupportsInterfaceWithLookup, IActivity, IActivityObject,
 
     }
 
-    /// Anyone can try to kill this Apostle;
-    function killApostle(uint256 _tokenId) public {
-        require(tokenId2Apostle[_tokenId].activeTime > 0);
-        require(defaultLifeTime(_tokenId) < now);
-
-        address habergPotionShop = registry.addressOf(CONTRACT_HABERG_POTION_SHOP);
-        IHabergPotionShop(habergPotionShop).tryKillApostle(_tokenId, msg.sender);
-    }
-
     function isDead(uint256 _tokenId) public view returns (bool) {
         return tokenId2Apostle[_tokenId].birthTime > 0 && tokenId2Apostle[_tokenId].deadTime > 0;
     }
@@ -473,5 +475,21 @@ contract ApostleBase is SupportsInterfaceWithLookup, IActivity, IActivityObject,
         cooldowns[11] =  uint32(2 days);
         cooldowns[12] =  uint32(4 days);
         cooldowns[13] =  uint32(7 days);
+    }
+    
+    function updateGenesAndTalents(uint256 _tokenId, uint256 _genes, uint256 _talents) public auth {
+        Apostle storage aps = tokenId2Apostle[_tokenId];
+        aps.genes = _genes;
+        aps.talents = _talents;
+    }
+
+    function batchUpdate(uint256[] _tokenIds, uint256[] _genesList, uint256[] _talentsList) public auth {
+        require(_tokenIds.length == _genesList.length && _tokenIds.length == _talentsList.length);
+        for(uint i = 0; i < _tokenIds.length; i++) {
+            Apostle storage aps = tokenId2Apostle[_tokenIds[i]];
+            aps.genes = _genesList[i];
+            aps.talents = _talentsList[i];
+        }
+
     }
 }
