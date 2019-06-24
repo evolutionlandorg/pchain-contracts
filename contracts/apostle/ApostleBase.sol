@@ -4,9 +4,11 @@ import "../common/contracts/interfaces/ISettingsRegistry.sol";
 import "../common/contracts/interfaces/IActivity.sol";
 import "../common/contracts/interfaces/IActivityObject.sol";
 import "../common/contracts/interfaces/IObjectOwnership.sol";
+import "../common/contracts/interfaces/ITokenUse.sol";
 import "../common/contracts/PausableDSAuth.sol";
 import "../common/contracts/SupportsInterfaceWithLookup"
 import "./ApostleSettingIds.sol";
+import "./interfaces/IGeneScience.sol";
 
 contract ApostleBase is SupportsInterfaceWithLookup, IActivity, IActivityObject, PausableDSAuth{
 
