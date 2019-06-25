@@ -189,7 +189,7 @@ contract TokenUse is DSAuth, ITokenUse, SettingIds {
 
         tokenId2UseOffer[tokenId].owner.transfer(expense.sub(cut));
 
-        registry.addressOf(CONTRACT_REVENUE_POOL).transfer(cut, toBytes(_from));
+        registry.addressOf(CONTRACT_REVENUE_POOL).transfer(cut);
 
         _takeTokenUseOffer(tokenId, _from);
     }
