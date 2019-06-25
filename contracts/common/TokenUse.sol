@@ -308,11 +308,6 @@ contract TokenUse is DSAuth, ITokenUse, SettingIds {
             owner.transfer(address(this).balance);
             return;
         }
-        ERC20 token = ERC20(_token);
-        uint balance = token.balanceOf(address(this));
-        token.transfer(owner, balance);
-
-        emit ClaimedTokens(_token, owner, balance);
     }
 
     function toBytes(address x) public pure returns (bytes b) {
