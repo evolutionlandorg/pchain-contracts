@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import "./SafeMath.sol";
 import "./ERC721.sol";
-import "./interfaces/ERC223.sol";
 import "./interfaces/ITokenUse.sol";
 import "./interfaces/IActivity.sol";
 import "./interfaces/ISettingsRegistry.sol";
