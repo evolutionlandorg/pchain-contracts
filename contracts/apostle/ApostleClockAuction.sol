@@ -195,7 +195,7 @@ contract ApostleClockAuction is PausableDSAuth, ApostleSettingIds {
         uint refund = _valueInToken - priceInToken;
 
         if (refund > 0) {
-            transfer(_from, refund);
+            _from.transfer(refund);
         }
 
         uint bidMoment;
@@ -353,7 +353,6 @@ contract ApostleClockAuction is PausableDSAuth, ApostleSettingIds {
             owner.transfer(address(this).balance);
             return;
         }
-        emit ClaimedTokens(_token, owner, balance);
     }
 
     /// @dev Computes owner's cut of a sale.

@@ -1,12 +1,13 @@
 pragma solidity ^0.4.24;
 
-import "../common/contracts/interfaces/ISettingsRegistry.sol";
-import "../common/contracts/interfaces/IActivity.sol";
-import "../common/contracts/interfaces/IActivityObject.sol";
-import "../common/contracts/interfaces/IObjectOwnership.sol";
-import "../common/contracts/interfaces/ITokenUse.sol";
-import "../common/contracts/PausableDSAuth.sol";
-import "../common/contracts/SupportsInterfaceWithLookup"
+import "../common/ERC721.sol";
+import "../common/interfaces/ISettingsRegistry.sol";
+import "../common/interfaces/IActivity.sol";
+import "../common/interfaces/IActivityObject.sol";
+import "../common/interfaces/IObjectOwnership.sol";
+import "../common/interfaces/ITokenUse.sol";
+import "../common/PausableDSAuth.sol";
+import "../common/SupportsInterfaceWithLookup.sol";
 import "./ApostleSettingIds.sol";
 import "./interfaces/IGeneScience.sol";
 
@@ -362,40 +363,19 @@ contract ApostleBase is SupportsInterfaceWithLookup, IActivity, IActivityObject,
         uint sireId;
         uint level;
 
-        if (msg.sender == registry.addressOf(CONTRACT_RING_ERC20_TOKEN)) {
-            require(_value >= autoBirthFee, 'not enough to breed.');
-            ERC223(msg.sender).transfer(registry.addressOf(CONTRACT_REVENUE_POOL), _value, toBytes(_from));
+        require(_value >= autoBirthFee, 'not enough to breed.');
+        registry.addressOf(CONTRACT_REVENUE_POOL).transfer(_value);
 
-            assembly {
-                let ptr := mload(0x40)
-                calldatacopy(ptr, 0, calldatasize)
-                matronId := mload(add(ptr, 132))
-                sireId := mload(add(ptr, 164))
-            }
-
-            // All checks passed, apostle gets pregnant!
-            _breedWith(matronId, sireId);
-            emit AutoBirth(matronId, uint48(tokenId2Apostle[matronId].cooldownEndTime));
-
-        } else if (isValidResourceToken(msg.sender)){
-
-            assembly {
-                let ptr := mload(0x40)
-                calldatacopy(ptr, 0, calldatasize)
-                matronId := mload(add(ptr, 132))
-                level := mload(add(ptr, 164))
-            }
-
-            require(level > 0 && _value >= level * registry.uintOf(UINT_MIX_TALENT), 'resource for mixing is not enough.');
-
-            sireId = tokenId2Apostle[matronId].siringWithId;
-
-            // TODO: msg.sender must be valid resource tokens, this is now checked in the implement of IGeneScience.
-            // better to check add a API in IGeneScience for checking valid msg.sender is one of the resource.
-            require(_payAndMix(matronId, sireId, msg.sender, level));
-
+        assembly {
+            let ptr := mload(0x40)
+            calldatacopy(ptr, 0, calldatasize)
+            matronId := mload(add(ptr, 132))
+            sireId := mload(add(ptr, 164))
         }
 
+        // All checks passed, apostle gets pregnant!
+        _breedWith(matronId, sireId);
+        emit AutoBirth(matronId, uint48(tokenId2Apostle[matronId].cooldownEndTime));
     }
 
     function isDead(uint256 _tokenId) public view returns (bool) {

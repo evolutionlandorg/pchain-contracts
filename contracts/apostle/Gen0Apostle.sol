@@ -3,7 +3,7 @@ import "./ApostleSettingIds.sol";
 import "../common/interfaces/ISettingsRegistry.sol";
 import "./interfaces/IApostleBase.sol";
 import "./interfaces/IApostleAuction.sol";
-import "../common/ERC721/ERC721.sol";
+import "../common/ERC721.sol";
 import "../common/PausableDSAuth.sol";
 
 contract Gen0Apostle is PausableDSAuth, ApostleSettingIds {
@@ -102,8 +102,6 @@ contract Gen0Apostle is PausableDSAuth, ApostleSettingIds {
             owner.transfer(address(this).balance);
             return;
         }
-
-        emit ClaimedTokens(_token, owner, balance);
     }
 
     function claimERC721Tokens(uint256 _tokenId) public onlyOwner {
