@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import "./SafeMath.sol";
 import "./ERC721.sol";
-import "./interfaces/ERC223.sol";
 import "./interfaces/ITokenUse.sol";
 import "./interfaces/IActivity.sol";
 import "./interfaces/ISettingsRegistry.sol";
@@ -13,6 +12,9 @@ import "./DSAuth.sol";
 
 contract TokenUse is DSAuth, ITokenUse, SettingIds {
     using SafeMath for *;
+
+    // claimedToken event
+    event ClaimedTokens(address indexed token, address indexed owner, uint amount);
 
     event OfferCreated(uint256 indexed tokenId, uint256 duration, uint256 price, address acceptedActivity, address owner);
     event OfferCancelled(uint256 tokenId);
@@ -151,14 +153,6 @@ contract TokenUse is DSAuth, ITokenUse, SettingIds {
         emit OfferCancelled(_tokenId);
     }
 
-    function takeTokenUseOffer(uint256 _tokenId) public {
-        uint256 expense = uint256(tokenId2UseOffer[_tokenId].price);
-
-        tokenId2UseOffer[_tokenId].owner.transfer(expense);
-
-        _takeTokenUseOffer(_tokenId, msg.sender);
-    }
-
     function _takeTokenUseOffer(uint256 _tokenId, address _from) internal {
         require(tokenId2UseOffer[_tokenId].owner != address(0), "Offer does not exist for this token.");
         require(isObjectReadyToUse(_tokenId), "Token already in another activity.");
@@ -179,7 +173,7 @@ contract TokenUse is DSAuth, ITokenUse, SettingIds {
     }
 
     //TODO: allow batch operation
-    function tokenFallback(address _from, uint256 _value, bytes _data) public {\
+    function tokenFallback(address _from, uint256 _value, bytes _data) public {
         uint256 tokenId;
 
         assembly {
@@ -191,7 +185,11 @@ contract TokenUse is DSAuth, ITokenUse, SettingIds {
         uint256 expense = uint256(tokenId2UseOffer[tokenId].price);
         require(_value >= expense);
 
-        tokenId2UseOffer[tokenId].owner.transfer(expense);
+        uint256 cut = expense.mul(registry.uintOf(UINT_TOKEN_OFFER_CUT)).div(10000);
+
+        tokenId2UseOffer[tokenId].owner.transfer(expense.sub(cut));
+
+        registry.addressOf(CONTRACT_REVENUE_POOL).transfer(cut);
 
         _takeTokenUseOffer(tokenId, _from);
     }
@@ -299,6 +297,17 @@ contract TokenUse is DSAuth, ITokenUse, SettingIds {
             });
 
         emit OfferCreated(_tokenId, _duration, _price, _acceptedActivity, msg.sender);
+    }
+
+    /// @notice This method can be used by the owner to extract mistakenly
+    ///  sent tokens to this contract.
+    /// @param _token The address of the token contract that you want to recover
+    ///  set to 0 in case you want to extract ether.
+    function claimTokens(address _token) public auth {
+        if (_token == 0x0) {
+            owner.transfer(address(this).balance);
+            return;
+        }
     }
 
     function toBytes(address x) public pure returns (bytes b) {
