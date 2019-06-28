@@ -13,7 +13,7 @@ import "./SupportsInterfaceWithLookup.sol";
  */
 contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
 
-  bytes4 private constant InterfaceId_ERC721 = 0x80ac58cd;
+  bytes4 public constant InterfaceId_ERC721 = 0x80ac58cd;
   /*
    * 0x80ac58cd ===
    *   bytes4(keccak256('balanceOf(address)')) ^
@@ -27,7 +27,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    *   bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'))
    */
 
-  bytes4 private constant InterfaceId_ERC721Exists = 0x4f558e79;
+  bytes4 public constant InterfaceId_ERC721Exists = 0x4f558e79;
   /*
    * 0x4f558e79 ===
    *   bytes4(keccak256('exists(uint256)'))
