@@ -19,7 +19,7 @@ contract UpgradeabilityProxy is Proxy {
   /**
    * @dev Constructor function
    */
-  function UpgradeabilityProxy() public {}
+  constructor() {}
 
   /**
    * @dev Tells the address of the current implementation
