@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 import "./ApostleSettingIds.sol";
 import "../common/interfaces/ISettingsRegistry.sol";
 import "./interfaces/IApostleBase.sol";
-import "./interfaces/IApostleAuction.sol";
 import "../common/ERC721.sol";
 import "../common/PausableDSAuth.sol";
 
@@ -47,38 +46,13 @@ contract Gen0Apostle is PausableDSAuth, ApostleSettingIds {
         gen0Count++;
     }
 
-    function createGen0Auction(
-        uint256 _tokenId,
-        uint256 _startingPriceInToken,
-        uint256 _endingPriceInToken,
-        uint256 _duration,
-        uint256 _startAt,
-        address _token)
-    public {
-        require(operator == msg.sender, "you have no rights");
-        IApostleAuction auction = IApostleAuction(registry.addressOf(ApostleSettingIds.CONTRACT_APOSTLE_AUCTION));
-
-        // aprove land to auction contract
-        ERC721(registry.addressOf(SettingIds.CONTRACT_OBJECT_OWNERSHIP)).approve(address(auction), _tokenId);
-        // create an auciton
-        // have to set _seller to this
-        auction.createAuction(_tokenId,_startingPriceInToken, _endingPriceInToken, _duration,_startAt, _token);
-
-    }
-
-    function cancelAuction(uint256 _tokenId) public onlyOwner {
-        IApostleAuction auction = IApostleAuction(registry.addressOf(ApostleSettingIds.CONTRACT_APOSTLE_AUCTION));
-        auction.cancelAuction(_tokenId);
-    }
-
-
     function setOperator(address _operator) public onlyOwner {
         operator = _operator;
     }
 
-    function tokenFallback(address _from, uint256 _value, bytes _data) public {
+    function buy() payable public {
         address revenuePool = registry.addressOf(CONTRACT_REVENUE_POOL);
-        revenuePool.transfer(_value);
+        revenuePool.transfer(msg.value);
     }
 
     // to apply for the safeTransferFrom
