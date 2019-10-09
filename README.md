@@ -1,6 +1,5 @@
 # pchain-contracts
 
-# pchain-contracts
 
 1) 部署合约，获得合约地址：
 
