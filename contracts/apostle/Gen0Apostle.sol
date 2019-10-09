@@ -75,9 +75,9 @@ contract Gen0Apostle is PausableDSAuth, ApostleSettingIds {
         operator = _operator;
     }
 
-    function buy() payable public {
-        address revenuePool = registry.addressOf(CONTRACT_REVENUE_POOL);
-        revenuePool.transfer(msg.value);
+    function () payable public {
+        //address revenuePool = registry.addressOf(CONTRACT_REVENUE_POOL);
+        //revenuePool.transfer(msg.value);
     }
 
     // to apply for the safeTransferFrom
